@@ -1,5 +1,5 @@
 from sqlalchemy.orm import declarative_base, relationship, Session
-from sqlalchemy import Column, Integer, String, ForeignKey, create_engine, inspect, select
+from sqlalchemy import Column, Integer, String, ForeignKey, create_engine, inspect, select, func
 
 Base = declarative_base()
 
@@ -80,3 +80,24 @@ stmt_address = select(Address).where(Address.user_id.in_([2]))
 print("\nRecuperando os endereços de email de João")
 for addres in session.scalars(stmt_address):
     print(addres)
+
+stmt_order = select(User).order_by(User.full_name.desc())
+print("\nRecuperando info de maneira ordenda")
+for result in session.scalars(stmt_order):
+    print(result)
+
+stmt_join = select(User.full_name, Address.email_address).join_from(Address, User)
+print("\n")
+for result in session.scalars(stmt_join):
+    print(result)
+
+connection = engine.connect()
+results = connection.execute(stmt_join).fetchall()
+print("\nExecutando statement a partir da connection")
+for result in results:
+    print(result)
+
+stmt_count = select(func.count('*')).select_from(User)
+print("\nTotal de instâncias em User")
+for result in session.scalars(stmt_count):
+    print(result)
